@@ -7,14 +7,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ControllerTareaTest {
@@ -26,6 +27,9 @@ class ControllerTareaTest {
     // Mock del servicio de Tarea
     @Mock
     private TareaServiceImpl tareaServiceImpl;
+
+    @Mock
+    Tarea tarea;
 
     @Test
     public void testConsultarTarea() {
@@ -44,9 +48,8 @@ class ControllerTareaTest {
         tarea2.setVigente(false);
         mockedListaTareas.add(tarea2);
 
-        // Configure the mock behavior
+        // Cuando se llame al servicio de listar tareas, simularemos que devuelva el mock creado
         when(tareaServiceImpl.listarTareas()).thenReturn(mockedListaTareas);
-
 
         // llamar al metodo que esta bajo prueba
         ResponseEntity<?> response = tareaController.consultarTarea();
@@ -58,7 +61,58 @@ class ControllerTareaTest {
 
     }
 
+    @Test
+    public void testAgregarTarea() {
 
+        Tarea tarea = mock(Tarea.class);
+
+        // Mockear el comportamiento del servicio
+        when(tareaServiceImpl.agregarTarea(any(Tarea.class))).thenReturn(tarea);
+
+        // Ejecutar el método del controlador que queremos probar
+        ResponseEntity<?> response = tareaController.agregarTarea(tarea);
+
+        // Verificar que se devuelva un código de estado 201
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        // Verificar que la tarea devuelta en el cuerpo de la respuesta es la misma que la que se mockeó en el servicio
+        assertEquals(tarea, response.getBody());
+
+    }
+
+
+    @Test
+    public void testModificarTarea() {
+
+        Tarea tarea = mock(Tarea.class);
+
+        // Mockear el comportamiento del servicio
+        when(tareaServiceImpl.editarTarea(any(Tarea.class))).thenReturn(tarea);
+
+        // Ejecutar el método del controlador que queremos probar
+        ResponseEntity<?> response = tareaController.modificarTarea(tarea);
+
+        // Verificar que se devuelva un código de estado 201
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        // Verificar que la tarea devuelta en el cuerpo de la respuesta es la misma que la que se mockeó en el servicio
+        assertEquals(tarea, response.getBody());
+
+    }
+
+    @Test
+    public void testEliminarTarea() {
+        int tareaId = 1; // Id de la tarea a eliminar
+
+        // Ejecutar el método del controlador que queremos probar
+        ResponseEntity<?> response = tareaController.eliminarTarea(tareaId);
+
+        // Verificar que se devuelva un código de estado 200 (OK)
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Verificar que el método de servicio para remover la tarea fue invocado con el id correcto
+        verify(tareaServiceImpl).removerTarea(tareaId);
+    }
 }
 
 
